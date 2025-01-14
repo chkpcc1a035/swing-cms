@@ -1,6 +1,6 @@
-import { AppShell, Burger, Group } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { Package2 } from 'lucide-react';
+import { AppShell, Burger, Group, NavLink } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { Package2, Boxes, Settings } from "lucide-react";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [opened, { toggle }] = useDisclosure();
@@ -10,7 +10,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       header={{ height: 60 }}
       navbar={{
         width: 300,
-        breakpoint: 'sm',
+        breakpoint: "sm",
         collapsed: { mobile: !opened },
       }}
       padding="md"
@@ -26,7 +26,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </AppShell.Header>
 
       <AppShell.Navbar p="md">
-        {/* Add navigation items here */}
+        <NavLink label="Inventory" leftSection={<Boxes size={20} />} active />
+        <NavLink label="Settings" leftSection={<Settings size={20} />} />
       </AppShell.Navbar>
 
       <AppShell.Main>{children}</AppShell.Main>
