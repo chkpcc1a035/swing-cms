@@ -5,6 +5,10 @@ import { Login } from "./components/Login";
 import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import "@mantine/core/styles.css";
+import { Settings } from "./components/Settings";
+import { Inventory } from "./components/Inventory";
+import { SeriesControl } from "./components/SeriesControl";
+import "./i18n";
 
 function App() {
   return (
@@ -14,7 +18,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route
-              path="/*"
+              path="/"
               element={
                 <ProtectedRoute>
                   <Layout>
@@ -22,7 +26,12 @@ function App() {
                   </Layout>
                 </ProtectedRoute>
               }
-            />
+            >
+              <Route path="inventory" element={<Inventory />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="series" element={<SeriesControl />} />
+              <Route index element={<Inventory />} />
+            </Route>
           </Routes>
         </BrowserRouter>
       </AuthProvider>
