@@ -72,9 +72,8 @@ export default function LoginPage() {
       console.log("Login attempt result:", success);
 
       if (success) {
-        console.log("Login successful, navigating to home");
-        router.push("/");
-        router.refresh();
+        console.log("Login successful, navigating to inventory");
+        window.location.href = "/inventory";
       }
     } catch (error) {
       console.error("Login error:", error);

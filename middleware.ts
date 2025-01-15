@@ -5,6 +5,7 @@ import type { NextRequest } from "next/server";
 export async function middleware(req: NextRequest) {
   console.log(`[Middleware] Processing request for: ${req.nextUrl.pathname}`);
 
+  // Create a response object that we can modify
   const res = NextResponse.next();
   const supabase = createMiddlewareClient({ req, res });
 
@@ -18,29 +19,36 @@ export async function middleware(req: NextRequest) {
     }`
   );
 
-  // Define public paths that don't require authentication
-  const publicPaths = ["/login", "/api", "/_next", "/static", "/favicon.ico"];
-  const isPublicPath = publicPaths.some((path) =>
-    req.nextUrl.pathname.toLowerCase().startsWith(path)
-  );
-
-  // Handle authentication redirects
-  if (!session && !isPublicPath) {
-    console.log("[Middleware] No session, redirecting to login");
-    return NextResponse.redirect(new URL("/login", req.url));
+  // Define static paths that should be ignored
+  const staticPaths = ["/_next", "/static", "/api", "/favicon.ico"];
+  if (staticPaths.some((path) => req.nextUrl.pathname.startsWith(path))) {
+    return res;
   }
 
-  if (session && req.nextUrl.pathname === "/login") {
+  // Handle authentication redirects
+  if (!session) {
+    if (req.nextUrl.pathname !== "/login") {
+      console.log("[Middleware] No session, redirecting to login");
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+  } else if (req.nextUrl.pathname === "/login") {
     console.log(
-      "[Middleware] Session exists on login page, redirecting to home"
+      "[Middleware] Session exists on login page, redirecting to inventory"
     );
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/inventory", req.url));
   }
 
   return res;
 }
 
-// Update matcher to handle all routes except static files
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!_next/static|_next/image|favicon.ico).*)",
+  ],
 };
