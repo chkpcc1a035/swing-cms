@@ -5,6 +5,8 @@ import { supabase } from "@/lib/supabase";
 import { Table } from "@mantine/core";
 import { useTranslation } from "react-i18next";
 import { InventoryItem } from "@/types/inventory";
+import { getSignedUrl } from "@/app/actions/storage";
+import { Image as MantineImage } from "@mantine/core";
 
 interface ProductInfo {
   productImagePath: string;
@@ -18,6 +20,38 @@ interface WebsiteStatus {
 
 export function InventoryTable({ items }: { items: InventoryItem[] }) {
   const { t } = useTranslation();
+
+  const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  useEffect(() => {
+    const loadImages = async () => {
+      const urls: { [key: string]: string } = {};
+      const newErrors: { [key: string]: string } = {};
+
+      console.log("Client - Starting to load images for items:", items);
+
+      for (const item of items) {
+        if (item.product_info.productImagePath) {
+          try {
+            const path = `products_image/${item.product_info.productImagePath}`;
+            const { url } = await getSignedUrl(path);
+
+            urls[item.id] = url;
+          } catch (error) {
+            console.error("Client - Error for item", item.id, ":", error);
+            newErrors[item.id] =
+              error instanceof Error ? error.message : "Unknown error";
+          }
+        }
+      }
+
+      setImageUrls(urls);
+      setErrors(newErrors);
+    };
+
+    loadImages();
+  }, [items]);
 
   return (
     <Table withRowBorders withColumnBorders withTableBorder striped>
@@ -53,7 +87,21 @@ export function InventoryTable({ items }: { items: InventoryItem[] }) {
             </Table.Td>
             <Table.Td>{item.sku_number}</Table.Td>
             <Table.Td>{item.product_number}</Table.Td>
-            <Table.Td>{item.product_info.productImagePath}</Table.Td>
+            <Table.Td>
+              {imageUrls[item.id] ? (
+                <MantineImage
+                  src={imageUrls[item.id]}
+                  alt={item.product_info.productDescription}
+                  w={50}
+                  h={50}
+                  fit="cover"
+                />
+              ) : (
+                <div>
+                  {errors[item.id] ? `Error: ${errors[item.id]}` : "No image"}
+                </div>
+              )}
+            </Table.Td>
             <Table.Td>{item.product_series.series_name}</Table.Td>
             <Table.Td>{item.product_info.productDescription}</Table.Td>
             <Table.Td>{item.quantity}</Table.Td>
