@@ -53,6 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const initAuth = async () => {
       try {
         console.log("[AuthContext] Initializing auth state");
+        setIsLoading(true);
+
         const {
           data: { session },
         } = await supabase.auth.getSession();
@@ -63,26 +65,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
         setIsAuthenticated(!!session);
 
-        if (session) {
+        // Force navigation based on auth state
+        if (!session && pathname !== "/login") {
+          console.log("[AuthContext] No session, forcing navigation to login");
+          window.location.href = "/login";
+          return;
+        }
+
+        if (session && pathname === "/login") {
           console.log(
-            "[AuthContext] Session exists, current pathname:",
-            pathname
+            "[AuthContext] Session exists, forcing navigation to inventory"
           );
-          if (pathname === "/login") {
-            console.log("[AuthContext] Redirecting from login to inventory");
-            router.replace("/inventory");
-          }
-        } else {
-          console.log("[AuthContext] No session, current pathname:", pathname);
-          if (pathname !== "/login") {
-            console.log("[AuthContext] Redirecting to login");
-            router.replace("/login");
-          }
+          window.location.href = "/inventory";
+          return;
         }
       } catch (error) {
         console.error("[AuthContext] Auth initialization error:", error);
       } finally {
-        console.log("[AuthContext] Setting loading to false");
         setIsLoading(false);
       }
     };
@@ -96,27 +95,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         event,
         hasSession: !!session,
       });
-      const isAuthed = !!session;
-      setIsAuthenticated(isAuthed);
 
-      if (!isAuthed && pathname !== "/login") {
-        console.log(
-          "[AuthContext] No session after state change, redirecting to login"
-        );
-        router.replace("/login");
-      } else if (isAuthed && pathname === "/login") {
-        console.log(
-          "[AuthContext] Session exists after state change, redirecting to inventory"
-        );
-        router.replace("/inventory");
+      setIsAuthenticated(!!session);
+
+      // Force page reload on auth state change
+      if (!session && pathname !== "/login") {
+        window.location.href = "/login";
+      } else if (session && pathname === "/login") {
+        window.location.href = "/inventory";
       }
     });
 
     return () => {
-      console.log("[AuthContext] Cleaning up auth subscriptions");
       subscription.unsubscribe();
     };
-  }, [pathname, router]);
+  }, [pathname]);
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>
