@@ -1,11 +1,10 @@
-"use client";
-
 import {
   AppShell,
   Burger,
   Group,
   NavLink,
   ActionIcon,
+  useMantineColorScheme,
   Menu,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -18,19 +17,19 @@ import {
   Moon,
   Languages,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { t, i18n } = useTranslation();
   const [opened, { toggle }] = useDisclosure();
-  const pathname = usePathname();
+  const location = useLocation();
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === "dark";
 
-  // Return only children if on login page
-  if (pathname === "/Login") {
-    return <>{children}</>;
-  }
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
 
   return (
     <AppShell
@@ -95,24 +94,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <AppShell.Navbar p="md">
         <NavLink
           component={Link}
-          href="/inventory"
+          to="/inventory"
           label={t("nav.inventory")}
           leftSection={<Boxes size={20} />}
-          active={pathname === "/inventory"}
+          active={location.pathname === "/inventory"}
         />
         <NavLink
           component={Link}
-          href="/series"
+          to="/series"
           label={t("nav.series")}
           leftSection={<FileBox size={20} />}
-          active={pathname === "/series"}
+          active={location.pathname === "/series"}
         />
         <NavLink
           component={Link}
-          href="/settings"
+          to="/settings"
           label={t("nav.settings")}
           leftSection={<Settings size={20} />}
-          active={pathname === "/settings"}
+          active={location.pathname === "/settings"}
         />
       </AppShell.Navbar>
 
