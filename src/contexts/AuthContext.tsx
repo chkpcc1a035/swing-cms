@@ -49,6 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.replace("/login");
   };
 
+  // src/contexts/AuthContext.tsx
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -65,19 +66,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
         setIsAuthenticated(!!session);
 
-        // Force navigation based on auth state
+        // Use router.push instead of window.location for client-side navigation
         if (!session && pathname !== "/login") {
-          console.log("[AuthContext] No session, forcing navigation to login");
-          window.location.href = `${window.location.origin}/login`;
-          return;
-        }
-
-        if (session && pathname === "/login") {
-          console.log(
-            "[AuthContext] Session exists, forcing navigation to inventory"
-          );
-          window.location.href = `${window.location.origin}/inventory`;
-          return;
+          console.log("[AuthContext] No session, redirecting to login");
+          router.push("/login");
+        } else if (session && pathname === "/login") {
+          console.log("[AuthContext] Session exists, redirecting to inventory");
+          router.push("/inventory");
         }
       } catch (error) {
         console.error("[AuthContext] Auth initialization error:", error);
@@ -95,21 +90,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         event,
         hasSession: !!session,
       });
-
       setIsAuthenticated(!!session);
 
-      // Force page reload on auth state change
+      // Use router.push for client-side navigation
       if (!session && pathname !== "/login") {
-        window.location.href = "/login";
+        router.push("/login");
       } else if (session && pathname === "/login") {
-        window.location.href = "/inventory";
+        router.push("/inventory");
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [pathname]);
+  }, [pathname, router]);
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>

@@ -12,10 +12,5 @@
         }
       ]
     }
-  ],
-  "routes": [
-    { "src": "/login", "dest": "/" },
-    { "src": "/inventory", "dest": "/" },
-    { "src": "/(.*)", "dest": "/" }
   ]
 }
