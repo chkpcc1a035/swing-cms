@@ -1,3 +1,5 @@
+// src/components/Dashboard/index.tsx
+
 "use client";
 
 import {
@@ -7,8 +9,9 @@ import {
   NavLink,
   ActionIcon,
   Menu,
+  LoadingOverlay,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useColorScheme } from "@mantine/hooks";
 import {
   Package2,
   Boxes,
@@ -17,20 +20,67 @@ import {
   Sun,
   Moon,
   Languages,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/contexts/AuthContext";
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export default function Dashboard({ children }: { children: React.ReactNode }) {
   const { t, i18n } = useTranslation();
   const [opened, { toggle }] = useDisclosure();
   const pathname = usePathname();
+  const { isLoading, isAuthenticated, logout } = useAuth();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
 
-  // Return only children if on login page
-  if (pathname === "/Login") {
+  console.log("[Dashboard] Render:", {
+    pathname,
+    isLoading,
+    isAuthenticated,
+    colorScheme,
+    isDark,
+    currentLanguage: i18n.language,
+  });
+
+  const changeLanguage = (lang: string) => {
+    console.log("[Dashboard] Changing language to:", lang);
+    i18n.changeLanguage(lang);
+  };
+
+  // Show loading overlay while authentication is being checked
+  if (isLoading) {
+    console.log("[Dashboard] Showing loading overlay");
+    return (
+      <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
+        <LoadingOverlay
+          visible={true}
+          zIndex={1000}
+          overlayProps={{ radius: "sm", blur: 2 }}
+        />
+      </div>
+    );
+  }
+
+  // Return only children if on login page or not authenticated
+  if (pathname === "/login" || !isAuthenticated) {
+    console.log(
+      "[Dashboard] Not authenticated or on login page, rendering children only"
+    );
     return <>{children}</>;
   }
+
+  console.log("[Dashboard] Rendering full dashboard layout");
+
+  const handleLogout = async () => {
+    console.log("[Dashboard] Initiating logout");
+    try {
+      await logout();
+    } catch (error) {
+      console.error("[Dashboard] Logout error:", error);
+    }
+  };
 
   return (
     <AppShell
@@ -82,11 +132,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
             <ActionIcon
               variant="default"
-              onClick={() => toggleColorScheme()}
+              onClick={() => document.documentElement.classList.toggle("dark")}
               size="lg"
               aria-label="Toggle color scheme"
             >
               {isDark ? <Sun size={20} /> : <Moon size={20} />}
+            </ActionIcon>
+
+            <ActionIcon
+              variant="default"
+              onClick={handleLogout}
+              size="lg"
+              aria-label="Logout"
+            >
+              <LogOut size={20} />
             </ActionIcon>
           </Group>
         </Group>

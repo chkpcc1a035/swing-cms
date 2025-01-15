@@ -1,7 +1,9 @@
+// src/app/layout.tsx
+
 import { Metadata } from "next";
 import { MantineProvider } from "@mantine/core";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { Layout } from "@/components/Layout";
+import Dashboard from "@/components/Dashboard";
 import { I18nProvider } from "@/contexts/i18nProvider";
 import "@mantine/core/styles.css";
 
@@ -21,7 +23,7 @@ export default function RootLayout({
         <MantineProvider defaultColorScheme="dark">
           <I18nProvider>
             <AuthProvider>
-              <Layout>{children}</Layout>
+              <Dashboard>{children}</Dashboard>
             </AuthProvider>
           </I18nProvider>
         </MantineProvider>

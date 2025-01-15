@@ -1,3 +1,5 @@
+// src/contexts/AuthContext.tsx
+
 "use client";
 
 import {
@@ -8,6 +10,7 @@ import {
   useEffect,
 } from "react";
 import { supabase } from "../lib/supabase";
+import { useRouter, usePathname } from "next/navigation";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -21,72 +24,73 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    console.log(
-      "[AuthContext] Initial mount, isLoading:",
-      isLoading,
-      "isAuthenticated:",
-      isAuthenticated
-    );
-
-    // Check initial auth state
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log(
-        "[AuthContext] Initial session check:",
-        session ? "Session found" : "No session"
-      );
-      setIsAuthenticated(!!session);
-      setIsLoading(false);
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log(
-        "[AuthContext] Auth state changed:",
-        _event,
-        "Session:",
-        session ? "exists" : "none"
-      );
-      setIsAuthenticated(!!session);
-      setIsLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const login = async (email: string, password: string) => {
-    console.log("[AuthContext] Login attempt for:", email);
-    const { data, error } = await supabase.auth.signInWithPassword({
+    console.log("[AuthContext] Attempting login for:", email);
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-
-    if (error) {
-      console.log("[AuthContext] Login error:", error.message);
-      return false;
-    }
-
-    console.log("[AuthContext] Login successful, user:", data.user?.email);
-    setIsAuthenticated(!!data.user);
-    return !!data.user;
+    console.log(
+      "[AuthContext] Login result:",
+      error ? `Error: ${error.message}` : "Success"
+    );
+    return !error;
   };
 
   const logout = async () => {
-    console.log("[AuthContext] Logout initiated");
+    console.log("[AuthContext] Logging out user");
     await supabase.auth.signOut();
-    setIsAuthenticated(false);
-    console.log("[AuthContext] Logout completed");
+    console.log("[AuthContext] User logged out successfully");
+    router.replace("/login");
   };
 
-  console.log(
-    "[AuthContext] Render - isLoading:",
-    isLoading,
-    "isAuthenticated:",
-    isAuthenticated
-  );
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        console.log(
+          "[AuthContext] Session status:",
+          session ? "Active" : "No session"
+        );
+
+        setIsAuthenticated(!!session);
+
+        if (session && pathname === "/login") {
+          router.replace("/");
+        } else if (!session && pathname !== "/login") {
+          router.replace("/login");
+        }
+      } catch (error) {
+        console.error("[AuthContext] Auth initialization error:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      const isAuthed = !!session;
+      setIsAuthenticated(isAuthed);
+
+      if (!isAuthed && pathname !== "/login") {
+        router.replace("/login");
+      }
+    });
+
+    return () => {
+      console.log("[AuthContext] Cleaning up auth subscriptions");
+      subscription.unsubscribe();
+    };
+  }, [pathname, router]);
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>

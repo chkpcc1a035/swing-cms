@@ -1,3 +1,5 @@
+// src/app/login/page.tsx
+
 "use client";
 
 import {
@@ -24,15 +26,9 @@ import { useEffect } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      console.log("Authenticated, redirecting to home");
-      router.replace("/");
-      router.refresh();
-    }
-  }, [isAuthenticated, router]);
+  console.log("LoginPage render - Auth state:", { isAuthenticated, isLoading });
 
   const form = useForm({
     initialValues: {
@@ -46,15 +42,35 @@ export default function LoginPage() {
     },
   });
 
+  useEffect(() => {
+    console.log("Auth state changed:", { isAuthenticated, isLoading });
+    if (!isLoading && isAuthenticated) {
+      console.log("Authenticated, redirecting to home");
+      router.replace("/");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  if (isLoading) {
+    return null;
+  }
+
+  if (isAuthenticated) {
+    return null;
+  }
+
   const handleSubmit = async (values: typeof form.values) => {
+    console.log("Attempting login with email:", values.email);
     try {
       const success = await login(values.email, values.password);
+      console.log("Login attempt result:", success);
 
       if (success) {
+        console.log("Login successful, navigating to home");
         router.push("/");
-        router.refresh(); // Force a refresh of the page
+        router.refresh();
       }
     } catch (error) {
+      console.error("Login error:", error);
       notifications.show({
         title: "Error",
         message: (error as Error).message,
@@ -64,15 +80,19 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
+    console.log("Initiating Google OAuth login");
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
       });
 
       if (error) {
+        console.error("Google OAuth error:", error);
         throw error;
       }
+      console.log("Google OAuth initiated successfully");
     } catch (error) {
+      console.error("Google OAuth error:", error);
       notifications.show({
         title: "Error",
         message: (error as Error).message,
