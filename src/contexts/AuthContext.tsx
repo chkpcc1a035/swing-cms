@@ -44,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     console.log("[AuthContext] Logging out user");
     await supabase.auth.signOut();
+    setIsAuthenticated(false);
     console.log("[AuthContext] User logged out successfully");
     router.replace("/login");
   };
@@ -51,25 +52,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
+        console.log("[AuthContext] Initializing auth state");
         const {
           data: { session },
         } = await supabase.auth.getSession();
 
         console.log(
-          "[AuthContext] Session status:",
+          "[AuthContext] Initial session:",
           session ? "Active" : "No session"
         );
-
         setIsAuthenticated(!!session);
 
-        if (session && pathname === "/login") {
-          router.replace("/");
-        } else if (!session && pathname !== "/login") {
-          router.replace("/login");
+        if (session) {
+          console.log(
+            "[AuthContext] Session exists, current pathname:",
+            pathname
+          );
+          if (pathname === "/login") {
+            console.log("[AuthContext] Redirecting from login to inventory");
+            router.replace("/inventory");
+          }
+        } else {
+          console.log("[AuthContext] No session, current pathname:", pathname);
+          if (pathname !== "/login") {
+            console.log("[AuthContext] Redirecting to login");
+            router.replace("/login");
+          }
         }
       } catch (error) {
         console.error("[AuthContext] Auth initialization error:", error);
       } finally {
+        console.log("[AuthContext] Setting loading to false");
         setIsLoading(false);
       }
     };
@@ -78,12 +91,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("[AuthContext] Auth state changed:", {
+        event,
+        hasSession: !!session,
+      });
       const isAuthed = !!session;
       setIsAuthenticated(isAuthed);
 
       if (!isAuthed && pathname !== "/login") {
+        console.log(
+          "[AuthContext] No session after state change, redirecting to login"
+        );
         router.replace("/login");
+      } else if (isAuthed && pathname === "/login") {
+        console.log(
+          "[AuthContext] Session exists after state change, redirecting to inventory"
+        );
+        router.replace("/inventory");
       }
     });
 
