@@ -26,21 +26,24 @@ export async function middleware(req: NextRequest) {
   }
 
   // Handle authentication redirects
+  const baseUrl = req.nextUrl.origin;
+
   if (!session) {
     if (req.nextUrl.pathname !== "/login") {
       console.log("[Middleware] No session, redirecting to login");
-      return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.redirect(`${baseUrl}/login`);
     }
   } else if (req.nextUrl.pathname === "/login") {
     console.log(
       "[Middleware] Session exists on login page, redirecting to inventory"
     );
-    return NextResponse.redirect(new URL("/inventory", req.url));
+    return NextResponse.redirect(`${baseUrl}/inventory`);
   }
 
   return res;
 }
 
+// Configure which paths the middleware should run on
 export const config = {
   matcher: [
     /*

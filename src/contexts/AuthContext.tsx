@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Force navigation based on auth state
         if (!session && pathname !== "/login") {
           console.log("[AuthContext] No session, forcing navigation to login");
-          window.location.href = "/login";
+          window.location.href = `${window.location.origin}/login`;
           return;
         }
 
@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.log(
             "[AuthContext] Session exists, forcing navigation to inventory"
           );
-          window.location.href = "/inventory";
+          window.location.href = `${window.location.origin}/inventory`;
           return;
         }
       } catch (error) {
