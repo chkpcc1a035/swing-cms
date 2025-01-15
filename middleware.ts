@@ -5,51 +5,38 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // middleware.ts
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};
+
 export async function middleware(req: NextRequest) {
   try {
-    console.log(`[Middleware] Processing request for: ${req.nextUrl.pathname}`);
-
     const res = NextResponse.next();
     const supabase = createMiddlewareClient({ req, res });
 
     const {
       data: { session },
-      error,
     } = await supabase.auth.getSession();
 
-    if (error) {
-      console.error("[Middleware] Auth error:", error);
+    // Get the pathname from the URL
+    const path = req.nextUrl.pathname;
+
+    // If there's no session and we're not already on /login
+    if (!session && path !== "/login") {
+      const redirectUrl = new URL("/login", req.url);
+      return NextResponse.redirect(redirectUrl);
     }
 
-    console.log(
-      `[Middleware] Session status: ${
-        session ? "Authenticated" : "Not authenticated"
-      }`
-    );
-
-    // Ignore static paths
-    const staticPaths = ["/_next", "/static", "/api", "/favicon.ico"];
-    if (staticPaths.some((path) => req.nextUrl.pathname.startsWith(path))) {
-      return res;
-    }
-
-    const baseUrl = req.nextUrl.origin;
-
-    if (!session) {
-      if (req.nextUrl.pathname !== "/login") {
-        console.log("[Middleware] No session, redirecting to login");
-        return NextResponse.redirect(new URL("/login", baseUrl));
-      }
-    } else if (req.nextUrl.pathname === "/login") {
-      console.log(
-        "[Middleware] Session exists on login page, redirecting to inventory"
-      );
-      return NextResponse.redirect(new URL("/inventory", baseUrl));
+    // If there's a session and we're on /login
+    if (session && path === "/login") {
+      const redirectUrl = new URL("/inventory", req.url);
+      return NextResponse.redirect(redirectUrl);
     }
 
     return res;
   } catch (error) {
-    console.error("[Middleware] Unexpected error:", error);
+    console.error("[Middleware] Error:", error);
+    // In case of error, allow the request to continue
     return NextResponse.next();
   }
 }

@@ -49,33 +49,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.replace("/login");
   };
 
-  // src/contexts/AuthContext.tsx
   useEffect(() => {
     const initAuth = async () => {
       try {
-        console.log("[AuthContext] Initializing auth state");
         setIsLoading(true);
-
         const {
           data: { session },
         } = await supabase.auth.getSession();
 
-        console.log(
-          "[AuthContext] Initial session:",
-          session ? "Active" : "No session"
-        );
         setIsAuthenticated(!!session);
 
-        // Use router.push instead of window.location for client-side navigation
+        // Use router.replace instead of window.location
         if (!session && pathname !== "/login") {
-          console.log("[AuthContext] No session, redirecting to login");
-          router.push("/login");
+          router.replace("/login");
         } else if (session && pathname === "/login") {
-          console.log("[AuthContext] Session exists, redirecting to inventory");
-          router.push("/inventory");
+          router.replace("/inventory");
         }
       } catch (error) {
-        console.error("[AuthContext] Auth initialization error:", error);
+        console.error("[AuthContext] Error:", error);
       } finally {
         setIsLoading(false);
       }
@@ -85,24 +76,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("[AuthContext] Auth state changed:", {
-        event,
-        hasSession: !!session,
-      });
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session);
 
-      // Use router.push for client-side navigation
       if (!session && pathname !== "/login") {
-        router.push("/login");
+        router.replace("/login");
       } else if (session && pathname === "/login") {
-        router.push("/inventory");
+        router.replace("/inventory");
       }
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, [pathname, router]);
 
   return (
