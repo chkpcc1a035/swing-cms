@@ -7,15 +7,19 @@ import { Container, Title, Text, Center } from "@mantine/core";
 
 export default function HomePage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!isLoading && isAuthenticated) {
+      console.log("HomePage: Redirecting to inventory, auth state:", {
+        isAuthenticated,
+        isLoading,
+      });
       router.replace("/inventory");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isLoading, router]);
 
-  if (isAuthenticated) {
+  if (isLoading || isAuthenticated) {
     return null;
   }
 

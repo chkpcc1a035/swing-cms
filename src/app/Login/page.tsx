@@ -44,18 +44,24 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    console.log("Auth state changed:", { isAuthenticated, isLoading });
+    console.log("LoginPage: Auth state changed:", {
+      isAuthenticated,
+      isLoading,
+    });
     if (!isLoading && isAuthenticated) {
-      console.log("Authenticated, redirecting to home");
-      router.replace("/");
+      console.log("LoginPage: Authenticated, redirecting to inventory");
+      router.replace("/inventory");
+      router.refresh();
     }
   }, [isAuthenticated, isLoading, router]);
 
   if (isLoading) {
+    console.log("LoginPage: Loading, returning null");
     return null;
   }
 
   if (isAuthenticated) {
+    console.log("LoginPage: Already authenticated, returning null");
     return null;
   }
 
