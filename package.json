@@ -4,10 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "npx supabase gen types typescript --project-id ilhhxjajdfiflqltyhcw > database.types.ts && next dev",
-    "build": "next build",
+    "build": "npx supabase gen types typescript --project-id ilhhxjajdfiflqltyhcw > database.types.ts && next build",
     "start": "next start",
-    "lint": "next lint",
-    "type": "npx supabase gen types typescript --project-id ilhhxjajdfiflqltyhcw > database.types.ts"
+    "lint": "next lint"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
