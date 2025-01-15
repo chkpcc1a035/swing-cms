@@ -10,8 +10,9 @@ import {
   ActionIcon,
   Menu,
   LoadingOverlay,
+  useMantineColorScheme,
 } from "@mantine/core";
-import { useDisclosure, useColorScheme } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import {
   Package2,
   Boxes,
@@ -32,15 +33,13 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
   const [opened, { toggle }] = useDisclosure();
   const pathname = usePathname();
   const { isLoading, isAuthenticated, logout } = useAuth();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
 
   console.log("[Dashboard] Render:", {
     pathname,
     isLoading,
     isAuthenticated,
-    colorScheme,
-    isDark,
+    colorScheme: useMantineColorScheme().colorScheme,
+    isDark: useMantineColorScheme().colorScheme === "dark",
     currentLanguage: i18n.language,
   });
 
@@ -48,6 +47,9 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
     console.log("[Dashboard] Changing language to:", lang);
     i18n.changeLanguage(lang);
   };
+
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === "dark";
 
   // Show loading overlay while authentication is being checked
   if (isLoading) {
@@ -132,7 +134,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
 
             <ActionIcon
               variant="default"
-              onClick={() => document.documentElement.classList.toggle("dark")}
+              onClick={() => toggleColorScheme()}
               size="lg"
               aria-label="Toggle color scheme"
             >

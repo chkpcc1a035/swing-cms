@@ -23,7 +23,8 @@
       "costPrice": "成本價",
       "deliveryFee": "運費",
       "unitPrice": "單價",
-      "retailPrice": "零售價"
+      "retailPrice": "零售價",
+      "stockQty": "庫存數量"
     }
   }
 }

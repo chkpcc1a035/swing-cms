@@ -22,6 +22,7 @@ export type Database = {
           retail_price: number | null
           sku_number: string | null
           stock_location: string | null
+          stock_qry: number | null
           unit_price: number | null
           website_status: Json | null
           wholesale_price: number | null
@@ -38,6 +39,7 @@ export type Database = {
           retail_price?: number | null
           sku_number?: string | null
           stock_location?: string | null
+          stock_qry?: number | null
           unit_price?: number | null
           website_status?: Json | null
           wholesale_price?: number | null
@@ -54,6 +56,7 @@ export type Database = {
           retail_price?: number | null
           sku_number?: string | null
           stock_location?: string | null
+          stock_qry?: number | null
           unit_price?: number | null
           website_status?: Json | null
           wholesale_price?: number | null

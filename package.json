@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "npx supabase gen types typescript --project-id ilhhxjajdfiflqltyhcw > database.types.ts && next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type": "npx supabase gen types typescript --project-id ilhhxjajdfiflqltyhcw > database.types.ts"
   },
   "dependencies": {
     "@mantine/core": "^7.6.1",

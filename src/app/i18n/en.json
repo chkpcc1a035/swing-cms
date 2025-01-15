@@ -23,7 +23,8 @@
       "costPrice": "Cost Pri.",
       "deliveryFee": "Delivery Fee",
       "unitPrice": "Unit Pri.",
-      "retailPrice": "Retail Pri."
+      "retailPrice": "Retail Pri.",
+      "stockQty": "Stock Qty"
     }
   }
 }
