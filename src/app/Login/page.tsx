@@ -18,7 +18,7 @@ import {
 import { useForm } from "@mantine/form";
 import { Box as BoxIcon } from "lucide-react";
 import { FaApple, FaGoogle } from "react-icons/fa";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { notifications } from "@mantine/notifications";
@@ -27,6 +27,7 @@ import { useEffect } from "react";
 export default function LoginPage() {
   const router = useRouter();
   const { login, isAuthenticated, isLoading } = useAuth();
+  const supabase = createClient();
 
   console.log("LoginPage render - Auth state:", { isAuthenticated, isLoading });
 

@@ -9,7 +9,7 @@ import {
   ReactNode,
   useEffect,
 } from "react";
-import { supabase } from "../lib/supabase";
+import { createClient } from "@/utils/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
 
 interface AuthContextType {
@@ -26,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+  const supabase = createClient();
 
   const login = async (email: string, password: string) => {
     console.log("[AuthContext] Attempting login for:", email);

@@ -10,6 +10,7 @@
     "type": "npx supabase gen types typescript --project-id ilhhxjajdfiflqltyhcw > database.types.ts"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
     "@mantine/core": "^7.6.1",
     "@mantine/dropzone": "^7.6.1",
     "@mantine/form": "^7.6.1",

@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/client";
 import { useTranslation } from "react-i18next";
 import { InventoryTable } from "@/components/Inventory";
 import { InventoryItem } from "@/types/inventory";
-
 
 export default function InventoryPage() {
   const { t } = useTranslation();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
   useEffect(() => {
     fetchInventory();
